@@ -4,6 +4,7 @@ import re
 import time
 
 # https://www.google.com/search?tbm=isch&q=chinese
+# "https://baozougif.com"
 FirstUrl = "https://baozougif.com"
 history = []
 
@@ -17,13 +18,14 @@ def downloadPicture(content):
 
     for pictureSet in pictureUrlList:
         picUrl = pictureSet[0]
+        print("picture url = " + picUrl)
         try:
-            downloadReq = requests.get(picUrl, stream=True, timeout=10)
+            downloadReq = requests.get(picUrl, stream=True, timeout=20)
         except requests.ConnectionError as error:
             print("download error ", error)
             continue
 
-        fileName = picUrl.split('/')[-1]
+        fileName = "./cache/" + picUrl.split('/')[-1]
 
         # 下载片段计时
         startTime = time.time()
@@ -31,7 +33,8 @@ def downloadPicture(content):
         with open(fileName, 'wb') as f:
             for chunk in downloadReq.iter_content(chunk_size=chunkSize):
                 chunkTime = time.time() - startTime
-                if chunkTime > 10:
+                # print("load time = %.1f" %chunkTime)
+                if chunkTime >= 10:
                     print("download timeout %fs" %chunkTime)
                     break
                 if chunk:
@@ -52,7 +55,8 @@ def findDetailHtml(url):
         # 判断是否加载过该详情页
         if detailUrl in history:
             continue
-#        print("current url = " + detailUrl)
+        print("current url = " + detailUrl)
+
         try:
             detailRequest = requests.get(detailUrl, timeout=10)
         except requests.ConnectionError as error:
